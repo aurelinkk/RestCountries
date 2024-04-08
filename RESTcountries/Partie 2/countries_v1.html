@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css">
+    <title>Tous les pays</title>
+  </head>
+  <body>
+    <table>
+      <thead>
+        <tr>
+          <th>Nom en français</th>
+          <th>Population</th>
+          <th>Surface</th>
+          <th>Densité de population</th>
+          <th>Continent d'appartenance</th>
+          <th>Drapeau</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+      </tbody>
+    </table>
+    <script src="countries.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+      const tableBody = document.getElementById('table-body');
+
+      // Création du tableau
+      for (let country of countries) {
+        const tr = document.createElement('tr');
+
+        const nomTd = document.createElement('td');
+        nomTd.textContent = country.translations.fr;
+        tr.appendChild(nomTd);
+
+        const popTd = document.createElement('td');
+        popTd.textContent = country.population;
+        tr.appendChild(popTd);
+
+        const surfTd = document.createElement('td');
+        surfTd.textContent = country.area;
+        tr.appendChild(surfTd);
+
+        const densTd = document.createElement('td');
+        densTd.textContent = country.population / country.area;
+        tr.appendChild(densTd);
+
+        const contTd = document.createElement('td');
+        contTd.textContent = country.region;
+        tr.appendChild(contTd);
+
+        const drapeauTd = document.createElement('td');
+        const drapeauImg = document.createElement('img');
+        drapeauImg.src = country.flag;
+        drapeauImg.alt = `Drapeau de ${country.name}`;
+        drapeauImg.height = 50;
+        drapeauTd.appendChild(drapeauImg);
+        tr.appendChild(drapeauTd);
+
+        tableBody.appendChild(tr);
+      }
+    });
+    </script>
+  </body>
+</html>

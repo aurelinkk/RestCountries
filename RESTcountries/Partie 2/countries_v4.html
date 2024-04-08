@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css">
+    <title>Tous les pays</title>
+  </head>
+  <body>
+    <form id="filter-form">
+      <div>
+        <label for="continent-filter">Continent:</label>
+        <select id="continent-filter">
+          <option value="">--Tous les continents--</option>
+        </select>
+      </div>
+      <div>
+        <label for="lang-filter">Langue:</label>
+        <select id="lang-filter">
+          <option value="">--Toutes les langues--</option>
+        </select>
+      </div>
+      <div>
+        <label for="country-filter">Pays:</label>
+        <input type="text" id="country-filter">
+      </div>
+      <button type="submit">Filtrer</button>
+    </form>
+
+    <table id="liste-pays">
+      <thead>
+        <tr>
+          <th>Nom en français</th>
+          <th>Population</th>
+          <th>Surface</th>
+          <th>Densité de population</th>
+          <th>Continent d'appartenance</th>
+          <th>Drapeau</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+      </tbody>
+    </table>
+
+    <div id="pagination">
+      <button id="prev-btn" disabled>PRÉC</button>
+      <button id="next-btn">SUIV</button>
+    </div>
+
+    <div id="details">
+      <div id="details-content">
+        <!-- Contenu de la zone de détails -->
+      </div>
+      <button id="details-close">Fermer</button>
+    </div>
+
+  <script src="countries.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const tableBody = document.getElementById('table-body');
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const details = document.getElementById('details');
+      const detailsContent = document.getElementById('details-content');
+      let detailsOpened = false;
+      let currentPage = 1;
+      let filteredCountries = [];
+  
+      // On remplit les champs de filtre avec les options disponibles
+      const continentFilter = document.getElementById('continent-filter');
+      const languageFilter = document.getElementById('lang-filter');
+      const continentOptions = Array.from(new Set(countries.map(c => c.region)));
+      continentOptions.forEach(option => {
+        const opt = document.createElement('option');
+        opt.value = option;
+        opt.innerHTML = option;
+        continentFilter.appendChild(opt);
+      });
+      const languageOptions = Array.from(new Set(countries.flatMap(c => c.languages.map(l => l.name))));
+      languageOptions.forEach(option => {
+        const opt = document.createElement('option');
+        opt.value = option;
+        opt.innerHTML = option;
+        languageFilter.appendChild(opt);
+      });
+  
+      function renderTableData() {
+        // On clear la table avant de la remplir
+        tableBody.innerHTML = '';
+  
+        const start = (currentPage - 1) * 25;
+        const end = start + 25;
+        const countriesToRender = filteredCountries.slice(start, end);
+  
+        for (let country of countriesToRender) {
+          const tr = document.createElement('tr');
+          tr.setAttribute('data-id', country.alpha3Code);
+  
+          const nomTd = document.createElement('td');
+          nomTd.textContent = country.translations.fr;
+          tr.appendChild(nomTd);
+  
+          const popTd = document.createElement('td');
+          popTd.textContent = country.population;
+          tr.appendChild(popTd);
+  
+          const surfTd = document.createElement('td');
+          surfTd.textContent = country.area;
+          tr.appendChild(surfTd);
+  
+          const densTd = document.createElement('td');
+          densTd.textContent = country.population / country.area;
+          tr.appendChild(densTd);
+  
+          const contTd = document.createElement('td');
+          contTd.textContent = country.region;
+          tr.appendChild(contTd);
+  
+          const drapeauTd = document.createElement('td');
+          const drapeauImg = document.createElement('img');
+          drapeauImg.src = country.flag;
+          drapeauImg.alt = `Drapeau de ${country.translations.fr}`;
+          drapeauImg.height = 50;
+          drapeauTd.appendChild(drapeauImg);
+          tr.appendChild(drapeauTd);
+  
+          tableBody.appendChild(tr);
+        }
+
+        // Récupérer toutes les lignes de pays
+        const rows = document.querySelectorAll('tr');
+
+        // Ajouter un écouteur d'événement "click" à chaque ligne de pays
+        rows.forEach(function(row) {
+        row.addEventListener('click', function(event) {
+            // Si on clique sur l'entête, on ne fait rien
+            if (event.target.tagName === "TH") { return; }
+            // Récupérer l'identifiant du pays à partir de l'attribut "data-id" de la ligne
+            const countryId = this.getAttribute('data-id');
+            const target = event.target;
+            if (target.tagName === 'IMG') {
+            showFlag(countryId);
+            } else {
+            showDetails(countryId);
+            }
+        });
+        });
+  
+        // Activer désactiver les boutons en fonction de la page
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === Math.ceil(filteredCountries.length / 25);
+  
+        if (detailsOpened) {
+          details.style.display = 'block';
+        } else {
+          details.style.display = 'none';
+        }
+      }
+  
+      function showDetails(id) {
+        // Récupérer les informations du pays
+        const country = countries.find(c => c.alpha3Code === id);
+  
+        // Afficher les informations dans la zone de détails
+        detailsOpened = true;
+        const detailsContent = document.getElementById('details-content');
+        detailsContent.innerHTML = `
+          <h2>${country.translations.fr}</h2>
+          <p>Population: ${country.population}</p>
+          <p>Superficie: ${country.area}</p>
+          <p>Densité de population: ${country.population / country.area}</p>
+          <p>Continent: ${country.region}</p>
+          <img src="${country.flag}" alt="Drapeau de ${country.translations.fr}" height="100">
+        `;
+  
+        // Afficher la zone de détails
+        details.style.display = 'block';
+  
+        // Cacher la liste des pays et ajouter la classe "hidden"
+        const listepays = document.getElementById('liste-pays');
+        listepays.classList.add('hidden');
+        prevBtn.classList.add('hidden');
+        nextBtn.classList.add('hidden');
+      }
+  
+      function showFlag(id) {
+        const country = countries.find(c => c.alpha3Code === id);
+  
+        //Afficher le drapeau en gros
+        detailsOpened = true;
+        const detailsContent = document.getElementById('details-content');
+        detailsContent.innerHTML = `
+          <img src="${country.flag}" alt="Drapeau de ${country.translations.fr}" height="300">`;
+  
+        // Afficher la zone de détails
+        details.style.display = 'block';
+  
+        // Cacher la liste des pays et ajouter la classe "hidden"
+        const listepays = document.getElementById('liste-pays');
+        listepays.classList.add('hidden');
+        prevBtn.classList.add('hidden');
+        nextBtn.classList.add('hidden');
+      }
+  
+      // Fermer la zone de détails
+      const detailsClose = document.getElementById('details-close');
+      detailsClose.addEventListener('click', function() {
+        detailsOpened = false;
+        details.style.display = 'none';
+  
+        // Afficher la liste des pays et enlever la classe "hidden"
+        const listepays = document.getElementById('liste-pays');
+        listepays.classList.remove('hidden');
+        prevBtn.classList.remove('hidden');
+        nextBtn.classList.remove('hidden');
+      });
+  
+      function renderPagination() {
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === Math.ceil(filteredCountries.length / 25);
+      }
+      
+  
+      // Filtrer les pays
+      const filterForm = document.getElementById('filter-form');
+      filterForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+  
+        const continentFilterValue = continentFilter.value;
+        const languageFilterValue = languageFilter.value;
+        const countryFilterValue = document.getElementById('country-filter').value.toLowerCase();
+  
+        filteredCountries = countries.filter(country => {
+          if (continentFilterValue && country.region !== continentFilterValue) {
+            return false;
+          }
+          if (languageFilterValue && !country.languages.some(lang => lang.name === languageFilterValue)) {
+            return false;
+          }
+          if (countryFilterValue && !country.translations.fr.toLowerCase().includes(countryFilterValue)) {
+            return false;
+          }
+          return true;
+        });
+  
+        currentPage = 1;
+        renderTableData();
+        renderPagination();
+      });
+  
+      // Pagination
+      prevBtn.addEventListener('click', () => {
+        currentPage--;
+        renderTableData();
+        renderPagination();
+      });
+  
+      nextBtn.addEventListener('click', () => {
+        currentPage++;
+        renderTableData();
+        renderPagination();
+      });
+  
+      // Afficher les pays par défaut
+      filteredCountries = countries;
+      renderTableData();
+      renderPagination();
+    });
+  </script>
+  </body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css">
+    <title>Tous les pays</title>
+  </head>
+  <body>
+    <table id="liste-pays">
+      <thead>
+        <tr>
+          <th>Nom en français</th>
+          <th>Population</th>
+          <th>Surface</th>
+          <th>Densité de population</th>
+          <th>Continent d'appartenance</th>
+          <th>Drapeau</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+      </tbody>
+    </table>
+    <div id="pagination">
+      <button id="prev-btn" disabled>PRÉC</button>
+      <button id="next-btn">SUIV</button>
+    </div>
+
+    <div id="details">
+      <div id="details-content">
+        <!-- Contenu de la zone de détails -->
+      </div>
+      <button id="details-close">Fermer</button>
+    </div>
+    
+    <script src="countries.js"></script>
+    <script>
+
+      document.addEventListener("DOMContentLoaded", function() {
+        const tableBody = document.getElementById('table-body');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const details = document.getElementById('details');
+        const detailsContent = document.getElementById('details-content');
+        let detailsOpened = false;
+        let currentPage = 1;
+
+        function renderTableData() {
+          
+          // On clear la table avant de la remplir
+          tableBody.innerHTML = '';
+
+          const start = (currentPage - 1) * 25;
+          const end = start + 25;
+          const countriesToRender = countries.slice(start, end);
+
+          for (let country of countriesToRender) {
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-id', country.alpha3Code);
+
+            const nomTd = document.createElement('td');
+            nomTd.textContent = country.translations.fr;
+            tr.appendChild(nomTd);
+
+            const popTd = document.createElement('td');
+            popTd.textContent = country.population;
+            tr.appendChild(popTd);
+
+            const surfTd = document.createElement('td');
+            surfTd.textContent = country.area;
+            tr.appendChild(surfTd);
+
+            const densTd = document.createElement('td');
+            densTd.textContent = country.population / country.area;
+            tr.appendChild(densTd);
+
+            const contTd = document.createElement('td');
+            contTd.textContent = country.region;
+            tr.appendChild(contTd);
+
+            const drapeauTd = document.createElement('td');
+            const drapeauImg = document.createElement('img');
+            drapeauImg.src = country.flag;
+            drapeauImg.alt = `Drapeau de ${country.translations.fr}`;
+            drapeauImg.height = 50;
+            drapeauTd.appendChild(drapeauImg);
+            tr.appendChild(drapeauTd);
+
+            tableBody.appendChild(tr);
+          }
+
+          // Récupérer toutes les lignes de pays
+          const rows = document.querySelectorAll('tr');
+
+          // Ajouter un écouteur d'événement "click" à chaque ligne de pays
+          rows.forEach(function(row) {
+            row.addEventListener('click', function(event) {
+              // Si on clique sur l'entête, on ne fait rien 
+              if (event.target.tagName === "TH") { return; }
+              // Récupérer l'identifiant du pays à partir de l'attribut "data-id" de la ligne
+              const countryId = this.getAttribute('data-id');
+              const target = event.target;
+              if (target.tagName === 'IMG') {
+                showFlag(countryId);
+              } else {
+                showDetails(countryId);
+              }
+            });
+          });
+
+          // Désactiver le bouton précédent sur la première page
+          if (currentPage === 1) {
+            prevBtn.disabled = true;
+          } else {
+            prevBtn.disabled = false;
+          }
+
+          // Désactiver le bouton suivant sur la dernière page
+          if (currentPage === Math.ceil(countries.length / 25)) {
+            nextBtn.disabled = true;
+          } else {
+            nextBtn.disabled = false;
+          }
+
+          if (detailsOpened) {
+            details.style.display = 'block';
+          } else {
+            details.style.display = 'none';
+          }
+        }
+
+        function showDetails(id) {
+          // Récupérer les informations du pays
+          const country = countries.find(c => c.alpha3Code === id);
+
+          // Afficher les informations dans la zone de détails
+          detailsOpened = true;
+          const detailsContent = document.getElementById('details-content');
+          detailsContent.innerHTML = `
+            <h2>${country.translations.fr}</h2>
+            <p>Population: ${country.population}</p>
+            <p>Superficie: ${country.area}</p>
+            <p>Densité de population: ${country.population / country.area}</p>
+            <p>Continent: ${country.region}</p>
+            <img src="${country.flag}" alt="Drapeau de ${country.translations.fr}" height="100">
+          `;
+
+          // Afficher la zone de détails
+          details.style.display = 'block';
+
+          // Cacher la liste des pays et ajouter la classe "hidden"
+          const listepays = document.getElementById('liste-pays');
+          listepays.classList.add('hidden');
+          const prevBtn = document.getElementById('prev-btn');
+          prevBtn.classList.add('hidden');
+          const nextBtn = document.getElementById('next-btn');
+          nextBtn.classList.add('hidden');
+        }
+
+        function showFlag(id) {
+          const country = countries.find(c => c.alpha3Code === id);
+
+          //Afficher le drapeau en gros
+          detailsOpened = true;
+          const detailsContent = document.getElementById('details-content');
+          detailsContent.innerHTML = `
+            <img src="${country.flag}" alt="Drapeau de ${country.translations.fr}" height="300">`;
+
+          // Afficher la zone de détails
+          details.style.display = 'block';
+
+          // Cacher la liste des pays et ajouter la classe "hidden"
+          const listepays = document.getElementById('liste-pays');
+          listepays.classList.add('hidden');
+          const prevBtn = document.getElementById('prev-btn');
+          prevBtn.classList.add('hidden');
+          const nextBtn = document.getElementById('next-btn');
+          nextBtn.classList.add('hidden');
+        }
+
+        // Fermer la zone de détails
+        const detailsClose = document.getElementById('details-close');
+        detailsClose.addEventListener('click', function() {
+          detailsOpened = false;
+          details.style.display = 'none';
+
+          // Afficher la liste des pays et enlever la classe "hidden"
+          const listepays = document.getElementById('liste-pays');
+          listepays.classList.remove('hidden');
+          const prevBtn = document.getElementById('prev-btn');
+          prevBtn.classList.remove('hidden');
+          const nextBtn = document.getElementById('next-btn');
+          nextBtn.classList.remove('hidden');
+          renderTableData();
+        });
+
+        renderTableData();
+
+        prevBtn.addEventListener('click', function() {
+          currentPage--;
+          renderTableData();
+        });
+
+        nextBtn.addEventListener('click', function() {
+          currentPage++;
+          renderTableData();
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css">
+    <title>Tous les pays</title>
+  </head>
+  <body>
+    <table>
+      <thead>
+        <tr>
+          <th>Nom en français</th>
+          <th>Population</th>
+          <th>Surface</th>
+          <th>Densité de population</th>
+          <th>Continent d'appartenance</th>
+          <th>Drapeau</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+      </tbody>
+    </table>
+    <div id="pagination">
+      <button id="prev-btn" disabled>PRÉC</button>
+      <button id="next-btn">SUIV</button>
+    </div>
+    <script src="countries.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const tableBody = document.getElementById('table-body');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        let currentPage = 1;
+
+        function renderTableData() {
+          // On clear la table avant de la remplir
+          tableBody.innerHTML = '';
+
+          const start = (currentPage - 1) * 25;
+          const end = start + 25;
+          const countriesToRender = countries.slice(start, end);
+
+          for (let country of countriesToRender) {
+            const tr = document.createElement('tr');
+
+            const nomTd = document.createElement('td');
+            nomTd.textContent = country.translations.fr;
+            tr.appendChild(nomTd);
+
+            const popTd = document.createElement('td');
+            popTd.textContent = country.population;
+            tr.appendChild(popTd);
+
+            const surfTd = document.createElement('td');
+            surfTd.textContent = country.area;
+            tr.appendChild(surfTd);
+
+            const densTd = document.createElement('td');
+            densTd.textContent = country.population / country.area;
+            tr.appendChild(densTd);
+
+            const contTd = document.createElement('td');
+            contTd.textContent = country.region;
+            tr.appendChild(contTd);
+
+            const drapeauTd = document.createElement('td');
+            const drapeauImg = document.createElement('img');
+            drapeauImg.src = country.flag;
+            drapeauImg.alt = `Drapeau de ${country.name}`;
+            drapeauImg.height = 50;
+            drapeauTd.appendChild(drapeauImg);
+            tr.appendChild(drapeauTd);
+
+            tableBody.appendChild(tr);
+          }
+
+          // Désactiver le bouton précédent sur la première page
+          if (currentPage === 1) {
+            prevBtn.disabled = true;
+          } else {
+            prevBtn.disabled = false;
+          }
+
+          // Désactiver le bouton suivant sur la dernière page
+          if (currentPage === Math.ceil(countries.length / 25)) {
+            nextBtn.disabled = true;
+          } else {
+            nextBtn.disabled = false;
+          }
+        }
+
+        renderTableData();
+
+        prevBtn.addEventListener('click', function() {
+          currentPage--;
+          renderTableData();
+        });
+
+        nextBtn.addEventListener('click', function() {
+          currentPage++;
+          renderTableData();
+        });
+      });
+    </script>
+  </body>
+</html>

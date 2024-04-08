@@ -1,0 +1,44 @@
+/* Appliquer une bordure à toutes les cellules du tableau */
+  table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  /* Mettre en gras les en-têtes de colonnes */
+  th {
+    font-weight: bold;
+  }
+  
+  /* Appliquer un arrière-plan gris clair aux lignes paires */
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  /* Centrer le contenu des cellules */
+  td, th {
+    text-align: center;
+    width: 16.67%;
+  }
+  
+  /* Définir une largeur fixe pour la colonne des drapeaux */
+  td:last-child {
+    width: 100px;
+  }
+  
+  img {
+    width: 8em;
+    height: 5em;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  thead th.bold {
+  font-weight: bold;
+}
